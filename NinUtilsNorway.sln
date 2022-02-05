@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30114.105
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NinUtilsNorway", "NinUtilsNorway\NinUtilsNorway.csproj", "{30D2931F-03EE-4977-BFB0-08E0B6184FC1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NinUtilsNorway.Test", "NinUtilsNorway.Test\NinUtilsNorway.Test.csproj", "{9619DED9-5C25-429F-8426-64E17171A7A9}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{30D2931F-03EE-4977-BFB0-08E0B6184FC1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{30D2931F-03EE-4977-BFB0-08E0B6184FC1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{30D2931F-03EE-4977-BFB0-08E0B6184FC1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{30D2931F-03EE-4977-BFB0-08E0B6184FC1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9619DED9-5C25-429F-8426-64E17171A7A9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9619DED9-5C25-429F-8426-64E17171A7A9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9619DED9-5C25-429F-8426-64E17171A7A9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9619DED9-5C25-429F-8426-64E17171A7A9}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
