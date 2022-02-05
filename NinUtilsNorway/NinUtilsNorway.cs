@@ -56,6 +56,95 @@ namespace NinUtilsNorway
             return new[] { '4', '5', '6', '7' }.Contains(nin[0]);
         }
 
+        /// <summary>
+        /// Calculates age from Nin
+        /// </summary>
+        /// <param name="nin"></param>
+        /// <param name="nowTimeProvider">Provide an implementation to override now time. 
+        /// Useful for mocking</param>
+        /// <returns></returns>
+        /// <remarks>About individual numbers - the 7-9 digits of Nin - and rules of centuries. 
+        /// See explanation here: <see href="https://no.wikipedia.org/wiki/F%C3%B8dselsnummer" /></remarks>
+        public static int? GetAge(string nin, IDateTimeNowProvider nowTimeProvider = null)
+        {
+            nin = nin?.Trim(); 
+            if (nin?.Length != 11)
+            {
+                return null;
+            }
+            if (!long.TryParse(nin, out var _))
+            {
+                return null;
+            }
+
+            short individualNumber = short.Parse(nin.Substring(6, 3));
+            if (IsDNumber(nin))
+            {
+                nin = (byte.Parse(nin[0].ToString()) - 4).ToString() + nin.Skip(1);
+            }
+
+            string dayBorn = GetLeftPaddedValue(2, '0', nin.Substring(0, 2));
+            string monthBorn = GetLeftPaddedValue(2, '0', nin.Substring(2, 2));
+            string twodigitYearBorn = GetLeftPaddedValue(2, '0', nin.Substring(4, 2));
+
+            DateTime birthDate;
+
+            DateTime today = nowTimeProvider?.GetToday() ?? DateTime.Today; 
+
+            if (individualNumber >= 500 && individualNumber <= 749)
+            {
+                if (DateTime.TryParseExact($"{dayBorn}.{monthBorn}.18{twodigitYearBorn}", "dd.MM.yyyy", null, System.Globalization.DateTimeStyles.None, out birthDate))
+                {
+                    int age = GetAge(birthDate, DateTime.Today);
+                    if (age < 125 && age >= 0)
+                    {
+                        return age;
+                    }
+                }
+            }
+
+            if ((individualNumber >= 0 && individualNumber <= 499) || (individualNumber >= 900 && individualNumber <= 999))
+            {
+                if (DateTime.TryParseExact($"{dayBorn}.{monthBorn}.19{twodigitYearBorn}", "dd.MM.yyyy", null, System.Globalization.DateTimeStyles.None, out birthDate))
+                {
+                    int age = GetAge(birthDate, DateTime.Today);
+                    if (age < 125 && age >= 0)
+                    {
+                        return age;
+                    }
+                }
+            }
+
+            if (individualNumber >= 500 && individualNumber <= 999)
+            {
+                if (DateTime.TryParseExact($"{dayBorn}.{monthBorn}.20{twodigitYearBorn}", "dd.MM.yyyy", null, System.Globalization.DateTimeStyles.None, out birthDate))
+                {
+                    int age = GetAge(birthDate, DateTime.Today);
+                    if (age < 125 && age >= 0)
+                    {
+                        return age; 
+                    }
+                }
+            }
+
+            return null; 
+        }
+
+        private static string GetLeftPaddedValue(int totalWidth, char padChar, string input)
+        {
+            return input.PadLeft(totalWidth, padChar).ToString();
+        }
+
+        private static int GetAge(DateTime from, DateTime to)
+        {
+            var age = to.Year - from.Year;
+            if (from.Date > to.AddYears(-age))
+            {
+                age--;
+            }
+            return age;
+        }
+
 
 
 
