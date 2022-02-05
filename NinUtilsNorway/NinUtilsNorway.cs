@@ -38,6 +38,25 @@ namespace NinUtilsNorway
             return isFemale ? Gender.Female : Gender.Male;
         }
 
+        /// <summary>
+        /// Returns true if a person is having a D-number. A d-number is given to foreign workers in 
+        /// Norway as a temporary identifier during their work period. It is similar to a ordinary Nin (fødselsnummer), but 
+        /// for the first digit in the nin, we add 4. This gives 4,5,6,7 as possible digits for the first digits.
+        /// A lot of other characteristics of D-number are similar to ordinary Nin, including the two control digits follow same rules.
+        /// </summary>
+        /// <param name="nin"></param>
+        /// <returns></returns>
+        public static bool IsDNumber(string nin)
+        {
+            nin = nin?.Trim(); 
+            if (nin?.Length != 11)
+            {
+                return false; 
+            }
+            return new[] { '4', '5', '6', '7' }.Contains(nin[0]);
+        }
+
+
 
 
 
