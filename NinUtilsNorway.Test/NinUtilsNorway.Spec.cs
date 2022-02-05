@@ -61,7 +61,29 @@ public class NinUtilsNorwaySpec
     {        
         NinUtilsNorway.GetAge(nin, new NowTimeProvider()).Should().Be(expectedAge); //note adjust these tests later on as they are valid on 05.02.2022 .. 
     }
-  
+
+    [Test]
+    [TestCase("31129956715", true)]
+    public void IsValidNinReturnsExpected(string nin, bool expected)
+    {
+        NinUtilsNorway.IsValidNin(nin).Should().Be(expected);
+    }
+
+    [Test]
+    [TestCase("311299567", "15")]
+    [TestCase("270283345", "89")]
+    [TestCase("140254107", "51")]
+    [TestCase("090274185", "94")]
+    [TestCase("141164377", "41")]
+    [TestCase("050701642", "07")]
+    [TestCase("240610272", "42")]
+    [TestCase("300601077", "49")]
+    public void GetControlDigitsForNinReturnsExpected(string nin, string expected)
+    {
+        NinUtilsNorway.GetControlDigitsForNin(nin).Should().Be(expected);
+    }
+
+
 }
 
 internal class NowTimeProvider : IDateTimeNowProvider

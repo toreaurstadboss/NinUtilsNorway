@@ -57,6 +57,121 @@ namespace NinUtilsNorway
         }
 
         /// <summary>
+        /// Nin are composed of two control digits at the end. We can calculate these digits. 
+        /// Usage: pass in the first NINE digits of the Nin. The last two digits will then be calculated. 
+        /// For given first nine digits of we calculate the control digits, last two digits of the nin
+        //  Pass in the first nine digits. 11 - (the weighted sum modulo 11) is then returned for first control digit
+        //  k1. And the second control digit 2 is similarly calculated, but include the first control digit also as a 
+        //  self correcting mechanism.
+        /// </summary>
+        /// <param name="nin"></param>
+        /// <returns></returns>
+        public static string GetControlDigitsForNin(string nin)
+        {
+            nin = nin?.Trim();
+            if (nin?.Length != 9)
+            {
+                return null;
+            }
+
+            nin += "00"; //adjust temporarily for D-number check
+
+            if (!long.TryParse(nin, out var _))
+            {
+                return null;
+            }
+
+            if (IsDNumber(nin))
+            {
+                nin = (byte.Parse(nin[0].ToString()) - 4).ToString() + nin.Skip(1);
+            }
+
+            nin = nin.Substring(0, nin.Length - 2);
+
+            byte d1 = byte.Parse(nin[0].ToString());
+            byte d2 = byte.Parse(nin[1].ToString());
+            byte m1 = byte.Parse(nin[2].ToString());
+            byte m2 = byte.Parse(nin[3].ToString());
+            byte y1 = byte.Parse(nin[4].ToString());
+            byte y2 = byte.Parse(nin[5].ToString());
+            byte i1 = byte.Parse(nin[6].ToString());
+            byte i2 = byte.Parse(nin[7].ToString());
+            byte i3 = byte.Parse(nin[8].ToString());
+
+            //Formula is documented here: https://no.wikipedia.org/wiki/F%C3%B8dselsnummer
+            int k1 = 11 - ((3 * d1 + 7 * d2 + 6 * m1 + 1 * m2 + 8 * y1 + 9 * y2 + 4 * i1 + 5 * i2 + 2 * i3) % 11);
+            int k2 = 11 - ((5 * d1 + 4 * d2 + 3 * m1 + 2 * m2 + 7 * y1 + 6 * y2 + 5 * i1 + 4 * i2 + 3 * i3 + 2 * k1) % 11);
+            if (k1 == 11)
+            {
+                k1 = 0; //must be clamped to single digit in these cases
+            }
+            if (k2 == 11)
+            {
+                k2 = 0; //must be clamped to single digit in these cases
+            }
+            if (k1 == 10 || k2 == 10)
+            {
+                return null; //illeagal to have 10 as control digit, must be single digit. 
+            }
+            return $"{k1}{k2}";
+        }
+
+        /// <summary>
+        /// Calculates validity of Nin according to modulo 11 algorithm. 
+        /// </summary>
+        /// <param name="nin"></param>
+        /// <returns></returns>
+        /// <remarks><see href="http://www.fnrinfo.no/Teknisk/KontrollsifferSjekk.aspx"
+        /// Example of a Modulo-11 algorithm mathematical basis is shown here: 
+        /// <see href="http://www.pgrocer.net/Cis51/mod11.html"/>
+        /// </remarks>
+        public static bool IsValidNin(string nin)
+        {
+            nin = nin?.Trim();
+            if (nin?.Length != 11)
+            {
+                return false;
+            }
+
+            if (!long.TryParse(nin, out var _))
+            {
+                return false;
+            }
+
+            if (IsDNumber(nin))
+            {
+                nin = (byte.Parse(nin[0].ToString()) - 4).ToString() + nin.Skip(1);
+            }
+
+            int k1 = 0, k2 = 0; //weighted sums be 
+            int[] k1_weights = new int[] { 3, 7, 6, 1, 8, 9, 4, 5, 2, 1 };
+            foreach (var item in nin.Select((digit, index) => (digit, index)))
+            {
+                if (item.index == 10)
+                {
+                    break; //only considering first 10 digits of nin
+                }
+                k1 += int.Parse(item.digit.ToString()) * k1_weights[item.index];
+            }
+            if (k1 % 11 != 0)
+            {
+                return false; //k1 must be divisible by 11!
+            }
+            int[] k2_weights = new int[] { 5, 4, 3, 2, 7, 6, 5, 4, 3, 2, 1 };
+            foreach (var item in nin.Select((digit, index) => (digit, index)))
+            {             
+                k2 += int.Parse(item.digit.ToString()) * k2_weights[item.index];
+            }
+            if (k2 % 11 != 0)
+            {
+                return false;
+            }
+
+            return true; //k1 and k2 is now known to be both divisible with 11
+        }
+
+
+        /// <summary>
         /// Calculates age from Nin
         /// </summary>
         /// <param name="nin"></param>
@@ -95,7 +210,7 @@ namespace NinUtilsNorway
             {
                 if (DateTime.TryParseExact($"{dayBorn}.{monthBorn}.18{twodigitYearBorn}", "dd.MM.yyyy", null, System.Globalization.DateTimeStyles.None, out birthDate))
                 {
-                    int age = GetAge(birthDate, DateTime.Today);
+                    int age = GetAge(birthDate, today);
                     if (age < 125 && age >= 0)
                     {
                         return age;
@@ -107,7 +222,7 @@ namespace NinUtilsNorway
             {
                 if (DateTime.TryParseExact($"{dayBorn}.{monthBorn}.19{twodigitYearBorn}", "dd.MM.yyyy", null, System.Globalization.DateTimeStyles.None, out birthDate))
                 {
-                    int age = GetAge(birthDate, DateTime.Today);
+                    int age = GetAge(birthDate, today);
                     if (age < 125 && age >= 0)
                     {
                         return age;
@@ -119,7 +234,7 @@ namespace NinUtilsNorway
             {
                 if (DateTime.TryParseExact($"{dayBorn}.{monthBorn}.20{twodigitYearBorn}", "dd.MM.yyyy", null, System.Globalization.DateTimeStyles.None, out birthDate))
                 {
-                    int age = GetAge(birthDate, DateTime.Today);
+                    int age = GetAge(birthDate, today);
                     if (age < 125 && age >= 0)
                     {
                         return age; 
@@ -144,10 +259,6 @@ namespace NinUtilsNorway
             }
             return age;
         }
-
-
-
-
 
     }
 
