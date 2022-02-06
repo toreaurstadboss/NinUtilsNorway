@@ -17,18 +17,18 @@ digits. (usually Modulo 11 algorithm is used):
 - FH help numbers FH-numbers (similar to H-numbers)
 - DUF-number (given to asylum seekers by UDI)
 
-            About change of Nin into PID standard as of 2032 : <see href="https://www.skatteetaten.no/en/deling/opplysninger/folkeregisteropplysninger/pid/"/>
-            Sample test persons can be retrieved from here which was helpful in building the util methods.
-            <see href="https://skatteetaten.github.io/folkeregisteret-api-dokumentasjon/test-for-konsumenter/"/>
-            </remarks>
-            See useful list of definitions here: 
-            <see href="https://www.ehelse.no/standardisering/standarder/identifikatorer-for-personer"/>
-            And DUF-numbers (UDI) : 
-            <see href="https://www.udi.no/ord-og-begreper/duf-nummer/"/>
-            Note - Gender calculation will not necessarily be possible after 2032, as you are not guaranteed that 
-            Nin will contain correct gender information when PID is introduced. People will keep their Nin as before, 
-            but the semantic of Gender where the ninth digit (last of the three digits of 'individual number' is even number means = FEMALE and odd number = MALE is halted after 2032.
-            Newborns and new Nin (PID) will be gender-less, i.e. you cannot read gender out of Nin handed out after 2032. 
+About change of Nin into PID standard as of 2032 : https://www.skatteetaten.no/en/deling/opplysninger/folkeregisteropplysninger/pid/
+Sample test persons can be retrieved from here which was helpful in building the util methods.
+https://skatteetaten.github.io/folkeregisteret-api-dokumentasjon/test-for-konsumenter
+
+See useful list of definitions here: 
+https://www.ehelse.no/standardisering/standarder/identifikatorer-for-personer
+And DUF-numbers (UDI) : 
+https://www.udi.no/ord-og-begreper/duf-nummer/
+Note - Gender calculation will not necessarily be possible after 2032, as you are not guaranteed that 
+Nin will contain correct gender information when PID is introduced. People will keep their Nin as before, 
+but the semantic of Gender where the ninth digit (last of the three digits of 'individual number' is even number means = FEMALE and odd number = MALE is halted after 2032.
+Newborns and new Nin (PID) will be gender-less, i.e. you cannot read gender out of Nin handed out after 2032. 
 
 ####  NinUtilsNorway.NinUtilsNorway.GetGender(System.String)"
             <summary>
@@ -92,6 +92,33 @@ digits. (usually Modulo 11 algorithm is used):
             <returns></returns>
             <remarks>About individual numbers - the 7-9 digits of Nin - and rules of centuries. 
             See explanation here: <see href="https://no.wikipedia.org/wiki/F%C3%B8dselsnummer" /></remarks>
+
+
+####  NinUtilsNorway.NinutilsNorway.GetControlDigitsForNin(string nin)    
+         <summary>
+        /// Nin are composed of two control digits at the end. We can calculate these digits. 
+        /// Usage: pass in the first NINE digits of the Nin. The last two digits will then be calculated. 
+        /// For given first nine digits of we calculate the control digits, last two digits of the nin
+        //  Pass in the first nine digits. 11 - (the weighted sum modulo 11) is then returned for first control digit
+        //  k1. And the second control digit 2 is similarly calculated, but include the first control digit also as a 
+        //  self correcting mechanism.
+        /// </summary>
+        /// <param name="nin"></param>
+        /// <returns></returns>
+        </summary>
+
+
+#### NinUtilsNorway.NinUtilsNorway.IsValidNin(string nin)
+        /// <summary>
+        /// Calculates validity of Nin according to modulo 11 algorithm. 
+        /// </summary>
+        /// <param name="nin"></param>
+        /// <returns></returns>
+        /// <remarks><see href="http://www.fnrinfo.no/Teknisk/KontrollsifferSjekk.aspx"
+        /// Example of a Modulo-11 algorithm mathematical basis is shown here: 
+        /// <see href="http://www.pgrocer.net/Cis51/mod11.html"/>
+        /// </remarks>
+        /// </summary>
 
 
 Finally, note about testing. See : 
