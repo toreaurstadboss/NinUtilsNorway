@@ -82,7 +82,7 @@ digits. (usually Modulo 11 algorithm is used):
             <returns></returns>
         </member>
 
-#### NinUtilsNorway.NinUtilsNorway.GetAge(System.String,NinUtilsNorway.IDateTimeNowProvider)"
+#### NinUtilsNorway.NinUtilsNorway.GetAge(System.String,NinUtilsNorway.IDateTimeNowProvider)
             <summary>
             Calculates age from Nin
             </summary>
