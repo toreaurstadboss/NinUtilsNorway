@@ -81,8 +81,8 @@ digits. (usually Modulo 11 algorithm is used):
             <param name="nin"></param>
             <returns></returns>
         </member>
-  m.String)" -->
-        - name="M:NinUtilsNorway.NinUtilsNorway.GetAge(System.String,NinUtilsNorway.IDateTimeNowProvider)">
+
+#### NinUtilsNorway.NinUtilsNorway.GetAge(System.String,NinUtilsNorway.IDateTimeNowProvider)"
             <summary>
             Calculates age from Nin
             </summary>
