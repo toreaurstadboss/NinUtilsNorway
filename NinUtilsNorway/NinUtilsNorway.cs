@@ -8,9 +8,18 @@ namespace NinUtilsNorway
     /// Util methods for Nin (National identifier number) in Norway
     /// </summary>
     /// <remarks>
+    /// About change of Nin into PID standard as of 2032 : <see href="https://www.skatteetaten.no/en/deling/opplysninger/folkeregisteropplysninger/pid/"/>
     /// Sample test persons can be retrieved from here which was helpful in building the util methods.
     /// <see href="https://skatteetaten.github.io/folkeregisteret-api-dokumentasjon/test-for-konsumenter/"/>
     /// </remarks>
+    /// See useful list of definitions here: 
+    /// <see href="https://www.ehelse.no/standardisering/standarder/identifikatorer-for-personer"/>
+    /// And DUF-numbers (UDI) : 
+    /// <see href="https://www.udi.no/ord-og-begreper/duf-nummer/"/>
+    /// Note - Gender calculation will not necessarily be possible after 2032, as you are not guaranteed that 
+    /// Nin will contain correct gender information when PID is introduced. People will keep their Nin as before, 
+    /// but the semantic of Gender where the ninth digit (last of the three digits of 'individual number' is even number means = FEMALE and odd number = MALE is halted after 2032.
+    /// Newborns and new Nin (PID) will be gender-less, i.e. you cannot read gender out of Nin handed out after 2032. 
     public static class NinUtilsNorway
     {
 
@@ -39,6 +48,97 @@ namespace NinUtilsNorway
         }
 
         /// <summary>
+        /// Checks if this is a DUF-number. These numbers are given by UDI 
+        /// The check is only checking it is a number with 12 digits. The number must also 
+        /// reside in UDI data systems, which this method do not check.
+        /// </summary>
+        /// <returns></returns>
+        /// <remarks>Se notes from eHelse here: <see href="https://www.ehelse.no/standardisering/standarder/identifikatorer-for-personer#DUF-nummer"/></remarks>
+        public static bool IsDufNumber(string duf, IDateTimeNowProvider dateTimeNowProvider = null)
+        {
+            duf = duf?.Trim();
+            if (duf?.Length != 12)
+            {
+                return false;
+            }
+            if (!long.TryParse(duf, out var _))
+            {
+                return false;
+            }
+
+            int nowYear = dateTimeNowProvider != null ? dateTimeNowProvider.GetToday().Year : DateTime.Today.Year;
+
+            short year = short.Parse(duf.Substring(0, 4));
+            if (year < 1900 || year > nowYear)
+            {
+                return false; //first four digits are the year the asylum seeker applied application for permant residence in Norway. Must be at least after 1900 and not in the future as a basic check. 
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Checks if this is a help number H-number. The default convention for H-number is that it we add 
+        /// the number 4 to the third digit 
+        /// </summary>
+        /// <param name="useEightNineConvention">Use special convention that if the first digit is 8 or 9, it signals 
+        /// a Help Number. Note - this usually designates a FH-help number instead</param>
+        /// <returns></returns>
+        public static bool IsHelpNumber(string nin, bool useEightNineConventionFirstDigitConvention = false)
+        {
+            nin = nin?.Trim();
+            if (nin?.Length != 11)
+            {
+                return false; //even H-numbers are 11 digits.
+            }
+            if (useEightNineConventionFirstDigitConvention)
+            {
+                //this convention rather belongs to FH-numbers (see method IsFHNumber in this class) 
+                if (nin[0] == '8' || nin[0] == '9')
+                {
+                    return true; //H-numbers beginning with 8 or 9 signals a H-number in a simple matter. 
+                }
+            }
+
+            if (!long.TryParse(nin, out var _))
+            {
+                return false;
+            }
+
+            return new[] { '4', '5', '6', '7' }.Contains(nin[2]); //H-numbers add 4 to the third digit
+        }
+
+        /// <summary>
+        /// FH numbers are developed by KITH as a proposal established as a standard 18.01.2010. It is similar to Nin 
+        /// fødselsnumre with 11 digits, and the first digit is 8 or 9. The numbers in position 2 - 9 are generated
+        /// as random numbers. This standard conceals also gender, birthdate or which order the number is provided.
+        /// The algorithms allows about 200 million numbers minus 17% of these due to incorrect control digits (last two digits). 
+        /// Examples of people getting a FH-number are tourists, newborn (infants), unconcious people not identified, 
+        /// unidentified people or similar reasons that a fødselsnummer Nin or D-Number is not available. 
+        /// </summary>
+        /// <param name="number"></param>
+        /// <returns></returns>
+        public static bool IsFHNumber(string nin)
+        {
+            nin = nin?.Trim();
+            if (nin?.Length != 11)
+            {
+                return false;
+            }
+            if (!long.TryParse(nin, out var _))
+            {
+                return false;
+            }
+
+            if (nin[0] == '8' || nin[0] == '9')
+            {
+                return true; //H-numbers beginning with 8 or 9 signals a H-number in a simple matter. 
+            }
+
+            return false;
+        }
+
+        /// <summary>
         /// Returns true if a person is having a D-number. A d-number is given to foreign workers in 
         /// Norway as a temporary identifier during their work period. It is similar to a ordinary Nin (fødselsnummer), but 
         /// for the first digit in the nin, we add 4. This gives 4,5,6,7 as possible digits for the first digits.
@@ -48,12 +148,12 @@ namespace NinUtilsNorway
         /// <returns></returns>
         public static bool IsDNumber(string nin)
         {
-            nin = nin?.Trim(); 
+            nin = nin?.Trim();
             if (nin?.Length != 11)
             {
-                return false; 
+                return false;
             }
-            return new[] { '4', '5', '6', '7' }.Contains(nin[0]);
+            return new[] { '4', '5', '6', '7' }.Contains(nin[0]); //D-numbers add 3 to the first digit 
         }
 
         /// <summary>
@@ -79,6 +179,11 @@ namespace NinUtilsNorway
             if (!long.TryParse(nin, out var _))
             {
                 return null;
+            }
+
+            if (IsHelpNumber(nin))
+            {
+                return null; //H-numbers does not follow the Modulo 11 algorithm.        
             }
 
             if (IsDNumber(nin))
@@ -159,7 +264,7 @@ namespace NinUtilsNorway
             }
             int[] k2_weights = new int[] { 5, 4, 3, 2, 7, 6, 5, 4, 3, 2, 1 };
             foreach (var item in nin.Select((digit, index) => (digit, index)))
-            {             
+            {
                 k2 += int.Parse(item.digit.ToString()) * k2_weights[item.index];
             }
             if (k2 % 11 != 0)
@@ -182,13 +287,22 @@ namespace NinUtilsNorway
         /// See explanation here: <see href="https://no.wikipedia.org/wiki/F%C3%B8dselsnummer" /></remarks>
         public static int? GetAge(string nin, IDateTimeNowProvider nowTimeProvider = null)
         {
-            nin = nin?.Trim(); 
+            nin = nin?.Trim();
             if (nin?.Length != 11)
             {
                 return null;
             }
             if (!long.TryParse(nin, out var _))
             {
+                return null;
+            }
+
+            if (IsHelpNumber(nin) || IsFHNumber(nin) || IsDufNumber(nin))
+            {
+                //calculating age from help numbers are troublesome and is avoided. 
+                //albeit you could calculate approximately via H-number if only the first digit is e.g. '8' or '9' and 
+                //other parts of the Nin got standard setup. Usually H-numbers are just random generated after first digit 
+                //and contain no info about age or gender (maybe rudimentary info such as approximate age in DUF numbers via application year).
                 return null;
             }
 
@@ -204,7 +318,7 @@ namespace NinUtilsNorway
 
             DateTime birthDate;
 
-            DateTime today = nowTimeProvider?.GetToday() ?? DateTime.Today; 
+            DateTime today = nowTimeProvider?.GetToday() ?? DateTime.Today;
 
             if (individualNumber >= 500 && individualNumber <= 749)
             {
@@ -237,12 +351,12 @@ namespace NinUtilsNorway
                     int age = GetAge(birthDate, today);
                     if (age < 125 && age >= 0)
                     {
-                        return age; 
+                        return age;
                     }
                 }
             }
 
-            return null; 
+            return null;
         }
 
         private static string GetLeftPaddedValue(int totalWidth, char padChar, string input)

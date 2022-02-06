@@ -34,7 +34,7 @@ public class NinUtilsNorwaySpec
     [TestCase("21929774873", false)]
     public void GetIsDNumberReturnsExpected(string nin, bool expectedValue)
     {
-        NinUtilsNorway.IsDNumber(nin).Should().Be(expectedValue); 
+        NinUtilsNorway.IsDNumber(nin).Should().Be(expectedValue);
     }
 
     /// <summary>
@@ -58,7 +58,7 @@ public class NinUtilsNorwaySpec
     [TestCase("24061027242", 111)]
     [TestCase("30060107749", 120)]
     public void GetAgeReturnsExpected(string nin, int expectedAge)
-    {        
+    {
         NinUtilsNorway.GetAge(nin, new NowTimeProvider()).Should().Be(expectedAge); //note adjust these tests later on as they are valid on 05.02.2022 .. 
     }
 
