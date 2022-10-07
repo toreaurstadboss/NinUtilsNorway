@@ -146,7 +146,7 @@ In the .csproj file we have set this up:
 
 Then run the following command : 
 ```
-
+ dotnet markdown in:NinUtilsNorway.xml out:NinUtilsNorway.md 
 ```
 
 The website Markdown preview can show the Markdown file, 
