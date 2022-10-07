@@ -7,7 +7,7 @@
     <authors>Tore Aurstad IT</authors>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <license type="expression">MIT</license>
-     <icon>icon.png</icon> 
+	<iconUrl>https://github.com/toreaurstadboss/NinUtilsNorway/blob/main/NinUtilsNorway/icon.png</iconUrl>
     <projectUrl>https://github.com/toreaurstadboss/NinUtilsNorway</projectUrl>
     <description>A library for working with Norwegian PIDs - Person identifier (fnr - fødselsnumre) </description>
     <releaseNotes>Added method GetBirthDateFromNin. Support for people born in 18th century in GetAge method has now an overload parameter which must be set to true.</releaseNotes>

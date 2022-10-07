@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="icon.png" Pack="true" PackagePathPath="\" />
+    <None Remove="icon.png" />
     <None Remove="NinUtilsNorway.xml" />
     <None Remove="Readme.md" />
   </ItemGroup>
