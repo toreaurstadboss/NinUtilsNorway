@@ -4,6 +4,37 @@
         <name>NinUtilsNorway</name>
     </assembly>
     <members>
+        <member name="T:NinUtilsNorway.Gender">
+            <summary>
+            Gender enum : Unknown = 0 | Female = 1 | Male = 2
+            </summary>
+        </member>
+        <member name="F:NinUtilsNorway.Gender.Unknown">
+            <summary>
+            Unknown gender
+            </summary>
+        </member>
+        <member name="F:NinUtilsNorway.Gender.Female">
+            <summary>
+            Female
+            </summary>
+        </member>
+        <member name="F:NinUtilsNorway.Gender.Male">
+            <summary>
+            Male
+            </summary>
+        </member>
+        <member name="T:NinUtilsNorway.IDateTimeNowProvider">
+            <summary>
+            Used for mocking date times
+            </summary>
+        </member>
+        <member name="M:NinUtilsNorway.IDateTimeNowProvider.GetToday">
+            <summary>
+            Retrieves the Today value (DateTime.Today for example). Useful for mocking / unit testing.
+            </summary>
+            <returns></returns>
+        </member>
         <member name="T:NinUtilsNorway.NinUtilsNorway">
             <summary>
             Util methods for Nin (National identifier number) in Norway
@@ -47,7 +78,8 @@
             Checks if this is a help number H-number. The default convention for H-number is that it we add 
             the number 4 to the third digit 
             </summary>
-            <param name="useEightNineConvention">Use special convention that if the first digit is 8 or 9, it signals 
+            <param name="nin">Norwegian fnr (PID)</param>
+            <param name="useEightNineConventionFirstDigitConvention">Use special convention that if the first digit is 8 or 9, it signals 
             a Help Number. Note - this usually designates a FH-help number instead</param>
             <returns></returns>
         </member>
@@ -60,7 +92,7 @@
             Examples of people getting a FH-number are tourists, newborn (infants), unconcious people not identified, 
             unidentified people or similar reasons that a fødselsnummer Nin or D-Number is not available. 
             </summary>
-            <param name="number"></param>
+            <param name="nin"></param>
             <returns></returns>
         </member>
         <member name="M:NinUtilsNorway.NinUtilsNorway.IsDNumber(System.String)">
@@ -73,14 +105,37 @@
             <param name="nin"></param>
             <returns></returns>
         </member>
-        <!-- Badly formed XML comment ignored for member "M:NinUtilsNorway.NinUtilsNorway.GetControlDigitsForNin(System.String)" -->
-        <!-- Badly formed XML comment ignored for member "M:NinUtilsNorway.NinUtilsNorway.IsValidNin(System.String)" -->
-        <member name="M:NinUtilsNorway.NinUtilsNorway.GetAge(System.String,NinUtilsNorway.IDateTimeNowProvider)">
+        <member name="M:NinUtilsNorway.NinUtilsNorway.GetControlDigitsForNin(System.String)">
+            Nin are composed of two control digits at the end. We can calculate these digits. 
+            Usage: pass in the first NINE digits of the Nin. The last two digits will then be calculated. 
+            For given first nine digits of we calculate the control digits, last two digits of the nin
+        </member>
+        <member name="M:NinUtilsNorway.NinUtilsNorway.IsValidNin(System.String)">
+            <summary>
+            Calculates validity of Nin according to modulo 11 algorithm. 
+            </summary>
+            <param name="nin"></param>
+            <returns></returns>
+            <remarks><see href="http://www.fnrinfo.no/Teknisk/KontrollsifferSjekk.aspx" /> </remarks>
+            <example>Example of a Modulo-11 algorithm mathematical basis is shown here</example>
+            <see href="http://www.pgrocer.net/Cis51/mod11.html" />
+            
+        </member>
+        <member name="M:NinUtilsNorway.NinUtilsNorway.GetBirthDateFromNin(System.String)">
+            <summary>
+            Calculates birth date from nin based on rules from
+            https://www.skatteetaten.no/person/folkeregister/fodsel-og-navnevalg/barn-fodt-i-norge/fodselsnummer/
+            </summary>
+            <param name="nin"></param>
+            <returns>DateOfBirth</returns>
+        </member>
+        <member name="M:NinUtilsNorway.NinUtilsNorway.GetAge(System.String,NinUtilsNorway.IDateTimeNowProvider,System.Boolean)">
             <summary>
             Calculates age from Nin
             </summary>
             <param name="nin"></param>
             <param name="nowTimeProvider">Provide an implementation to override now time. 
+            <param name="isPersonBornIn18thCentury">Is person born in 18th century?</param>
             Useful for mocking</param>
             <returns></returns>
             <remarks>About individual numbers - the 7-9 digits of Nin - and rules of centuries. 

@@ -1,6 +1,7 @@
 using FluentAssertions;
 using NUnit.Framework;
 using System;
+using System.Globalization;
 
 namespace NinUtilsNorway.Test;
 
@@ -83,6 +84,27 @@ public class NinUtilsNorwaySpec
         NinUtilsNorway.GetControlDigitsForNin(nin).Should().Be(expected);
     }
 
+    [Test]
+    [TestCase("04081629469", "04081916")]
+    [TestCase("03061990452", "03062019")]
+    [TestCase("54087619934", "14081976")]
+    [TestCase("26027226891", "26021972")]
+    [TestCase("99056326525", null)]
+    public void GetBirthDateFromNin(string nin, string actual)
+    {
+        var dob = NinUtilsNorway.GetBirthDateFromNin(nin);
+        var expectedDob = !string.IsNullOrWhiteSpace(actual) ? (DateTime?)DateTime.ParseExact(actual, "ddMMyyyy", CultureInfo.InvariantCulture) : null;
+        if (actual == null)
+        {
+            Assert.IsNull(actual);
+        }
+        else
+        {
+            dob.Should().NotBeNull();
+            // ReSharper disable once PossibleInvalidOperationException
+            Math.Abs(Convert.ToInt32(dob?.Subtract(expectedDob!.Value).TotalHours)).Should().BeLessThan(1);
+        }
+    }
 
 }
 

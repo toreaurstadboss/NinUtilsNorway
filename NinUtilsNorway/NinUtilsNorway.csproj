@@ -3,14 +3,19 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <DocumentationFile>C:\src\NinUtilsNorway\NinUtilsNorway\NinUtilsNorway.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="icon.png" Pack="true" PackagePathPath="\" />
     <None Remove="NinUtilsNorway.xml" />
     <None Remove="Readme.md" />
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="icon.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
     <Content Include="NinUtilsNorway.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -21,7 +26,7 @@
   
  
   <ItemGroup>
-    <DotNetCliToolReference Include="dotnet-markdown" Version="1.0.4" />
+    <DotNetCliToolReference Include="dotnet-markdown" Version="1.0.9" />
   </ItemGroup>
 
 </Project>

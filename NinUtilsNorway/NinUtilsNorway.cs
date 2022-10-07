@@ -81,7 +81,8 @@ namespace NinUtilsNorway
         /// Checks if this is a help number H-number. The default convention for H-number is that it we add 
         /// the number 4 to the third digit 
         /// </summary>
-        /// <param name="useEightNineConvention">Use special convention that if the first digit is 8 or 9, it signals 
+        /// <param name="nin">Norwegian fnr (PID)</param>
+        /// <param name="useEightNineConventionFirstDigitConvention">Use special convention that if the first digit is 8 or 9, it signals 
         /// a Help Number. Note - this usually designates a FH-help number instead</param>
         /// <returns></returns>
         public static bool IsHelpNumber(string nin, bool useEightNineConventionFirstDigitConvention = false)
@@ -116,7 +117,7 @@ namespace NinUtilsNorway
         /// Examples of people getting a FH-number are tourists, newborn (infants), unconcious people not identified, 
         /// unidentified people or similar reasons that a fødselsnummer Nin or D-Number is not available. 
         /// </summary>
-        /// <param name="number"></param>
+        /// <param name="nin"></param>
         /// <returns></returns>
         public static bool IsFHNumber(string nin)
         {
@@ -154,18 +155,16 @@ namespace NinUtilsNorway
                 return false;
             }
             return new[] { '4', '5', '6', '7' }.Contains(nin[0]); //D-numbers add 3 to the first digit 
-        }
+        } 
 
-        /// <summary>
+        // <summary>
         /// Nin are composed of two control digits at the end. We can calculate these digits. 
         /// Usage: pass in the first NINE digits of the Nin. The last two digits will then be calculated. 
         /// For given first nine digits of we calculate the control digits, last two digits of the nin
         //  Pass in the first nine digits. 11 - (the weighted sum modulo 11) is then returned for first control digit
         //  k1. And the second control digit 2 is similarly calculated, but include the first control digit also as a 
         //  self correcting mechanism.
-        /// </summary>
-        /// <param name="nin"></param>
-        /// <returns></returns>
+        // </summary>
         public static string GetControlDigitsForNin(string nin)
         {
             nin = nin?.Trim();
@@ -188,7 +187,7 @@ namespace NinUtilsNorway
 
             if (IsDNumber(nin))
             {
-                nin = (byte.Parse(nin[0].ToString()) - 4).ToString() + nin.Skip(1);
+                nin = (byte.Parse(nin[0].ToString()) - 4).ToString() + nin.Substring(1);
             }
 
             nin = nin.Substring(0, nin.Length - 2);
@@ -226,10 +225,10 @@ namespace NinUtilsNorway
         /// </summary>
         /// <param name="nin"></param>
         /// <returns></returns>
-        /// <remarks><see href="http://www.fnrinfo.no/Teknisk/KontrollsifferSjekk.aspx"
-        /// Example of a Modulo-11 algorithm mathematical basis is shown here: 
-        /// <see href="http://www.pgrocer.net/Cis51/mod11.html"/>
-        /// </remarks>
+        /// <remarks><see href="http://www.fnrinfo.no/Teknisk/KontrollsifferSjekk.aspx" /> </remarks>
+        /// <example>Example of a Modulo-11 algorithm mathematical basis is shown here</example>
+        /// <see href="http://www.pgrocer.net/Cis51/mod11.html" />
+        /// 
         public static bool IsValidNin(string nin)
         {
             nin = nin?.Trim();
@@ -245,7 +244,7 @@ namespace NinUtilsNorway
 
             if (IsDNumber(nin))
             {
-                nin = (byte.Parse(nin[0].ToString()) - 4).ToString() + nin.Skip(1);
+                nin = (byte.Parse(nin[0].ToString()) - 4).ToString() + nin.Substring(1);
             }
 
             int k1 = 0, k2 = 0; //weighted sums be 
@@ -275,17 +274,13 @@ namespace NinUtilsNorway
             return true; //k1 and k2 is now known to be both divisible with 11
         }
 
-
         /// <summary>
-        /// Calculates age from Nin
+        /// Calculates birth date from nin based on rules from
+        /// https://www.skatteetaten.no/person/folkeregister/fodsel-og-navnevalg/barn-fodt-i-norge/fodselsnummer/
         /// </summary>
         /// <param name="nin"></param>
-        /// <param name="nowTimeProvider">Provide an implementation to override now time. 
-        /// Useful for mocking</param>
-        /// <returns></returns>
-        /// <remarks>About individual numbers - the 7-9 digits of Nin - and rules of centuries. 
-        /// See explanation here: <see href="https://no.wikipedia.org/wiki/F%C3%B8dselsnummer" /></remarks>
-        public static int? GetAge(string nin, IDateTimeNowProvider nowTimeProvider = null)
+        /// <returns>DateOfBirth</returns>
+        public static DateTime? GetBirthDateFromNin(string nin)
         {
             nin = nin?.Trim();
             if (nin?.Length != 11)
@@ -309,6 +304,69 @@ namespace NinUtilsNorway
             short individualNumber = short.Parse(nin.Substring(6, 3));
             if (IsDNumber(nin))
             {
+                nin = (byte.Parse(nin[0].ToString()) - 4).ToString() + nin.Substring(1);
+            }
+
+            string dayBorn = GetLeftPaddedValue(2, '0', nin.Substring(0, 2));
+            string monthBorn = GetLeftPaddedValue(2, '0', nin.Substring(2, 2));
+            string twodigitYearBorn = GetLeftPaddedValue(2, '0', nin.Substring(4, 2));
+            int yearBorne = short.Parse(nin.Substring(4, 2));
+
+            DateTime birthDate;
+
+            if ((individualNumber >= 0 && individualNumber <= 499)) // || (individualNumber >= 900 && individualNumber <= 999))
+            {
+                DateTime.TryParseExact($"{dayBorn}.{monthBorn}.19{twodigitYearBorn}", "dd.MM.yyyy", null, System.Globalization.DateTimeStyles.None, out birthDate);
+                return birthDate;
+            }
+            if (individualNumber >= 900 && individualNumber <= 999 && yearBorne >= 40 && yearBorne <= 99)
+            {
+                DateTime.TryParseExact($"{dayBorn}.{monthBorn}.19{twodigitYearBorn}", "dd.MM.yyyy", null, System.Globalization.DateTimeStyles.None, out birthDate);
+                return birthDate;
+            }
+            if (individualNumber >= 500 && individualNumber <= 999)
+            {
+                DateTime.TryParseExact($"{dayBorn}.{monthBorn}.20{twodigitYearBorn}", "dd.MM.yyyy", null, System.Globalization.DateTimeStyles.None, out birthDate);
+                return birthDate;
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Calculates age from Nin
+        /// </summary>
+        /// <param name="nin"></param>
+        /// <param name="nowTimeProvider">Provide an implementation to override now time. 
+        /// <param name="isPersonBornIn18thCentury">Is person born in 18th century?</param>
+        /// Useful for mocking</param>
+        /// <returns></returns>
+        /// <remarks>About individual numbers - the 7-9 digits of Nin - and rules of centuries. 
+        /// See explanation here: <see href="https://no.wikipedia.org/wiki/F%C3%B8dselsnummer" /></remarks>
+        public static int? GetAge(string nin, IDateTimeNowProvider nowTimeProvider = null, bool isPersonBornIn18thCentury = false)
+        {
+            nin = nin?.Trim();
+            if (nin?.Length != 11)
+            {
+                return null;
+            }
+            if (!long.TryParse(nin, out var _))
+            {
+                return null;
+            }
+
+            if (IsHelpNumber(nin) || IsFHNumber(nin) || IsDufNumber(nin))
+            {
+                //calculating age from help numbers are troublesome and is avoided. It is also impossible to deduce it anyways as these PIDs do not contain age and gender information.. 
+                //albeit you could calculate approximately via H-number if only the first digit is e.g. '8' or '9' and 
+                //other parts of the Nin got standard setup. Usually H-numbers are just random generated after first digit 
+                //and contain no info about age or gender (maybe rudimentary info such as approximate age in DUF numbers via application year).
+                return null;
+            }
+
+            short individualNumber = short.Parse(nin.Substring(6, 3));
+            if (IsDNumber(nin))
+            {
                 nin = (byte.Parse(nin[0].ToString()) - 4).ToString() + nin.Skip(1);
             }
 
@@ -316,49 +374,60 @@ namespace NinUtilsNorway
             string monthBorn = GetLeftPaddedValue(2, '0', nin.Substring(2, 2));
             string twodigitYearBorn = GetLeftPaddedValue(2, '0', nin.Substring(4, 2));
 
-            DateTime birthDate;
-
+            DateTime? birthDate = GetBirthDateFromNin(nin);
             DateTime today = nowTimeProvider?.GetToday() ?? DateTime.Today;
-
-            if (individualNumber >= 500 && individualNumber <= 749)
+            if (birthDate == null)
             {
-                if (DateTime.TryParseExact($"{dayBorn}.{monthBorn}.18{twodigitYearBorn}", "dd.MM.yyyy", null, System.Globalization.DateTimeStyles.None, out birthDate))
+                return null;
+            }
+            int age = GetAge((DateTime)birthDate, today);
+            if (age < 125 && age >= 0)
+            {
+                return age;
+            }
+
+
+            if (isPersonBornIn18thCentury)
+            {
+                if (individualNumber >= 500 && individualNumber <= 749)
                 {
-                    int age = GetAge(birthDate, today);
-                    if (age < 125 && age >= 0)
+                    if (DateTime.TryParseExact($"{dayBorn}.{monthBorn}.18{twodigitYearBorn}", "dd.MM.yyyy", null, System.Globalization.DateTimeStyles.None,  out var birthDate18))
                     {
-                        return age;
+                        age = GetAge((DateTime) birthDate18, today);
+                        if (age < 130 && age >= 0)
+                        {
+                            return age;
+                        }
                     }
                 }
             }
 
-            if ((individualNumber >= 0 && individualNumber <= 499) || (individualNumber >= 900 && individualNumber <= 999))
-            {
-                if (DateTime.TryParseExact($"{dayBorn}.{monthBorn}.19{twodigitYearBorn}", "dd.MM.yyyy", null, System.Globalization.DateTimeStyles.None, out birthDate))
-                {
-                    int age = GetAge(birthDate, today);
-                    if (age < 125 && age >= 0)
-                    {
-                        return age;
-                    }
-                }
-            }
+            //if ((individualNumber >= 0 && individualNumber <= 499) || (individualNumber >= 900 && individualNumber <= 999))
+            //{
+            //    if (DateTime.TryParseExact($"{dayBorn}.{monthBorn}.19{twodigitYearBorn}", "dd.MM.yyyy", null, System.Globalization.DateTimeStyles.None, out birthDate))
+            //    {
+            //        int age = GetAge(birthDate, today);
+            //        if (age < 125 && age >= 0)
+            //        {
+            //            return age;
+            //        }
+            //    }
+            //}
 
-            if (individualNumber >= 500 && individualNumber <= 999)
-            {
-                if (DateTime.TryParseExact($"{dayBorn}.{monthBorn}.20{twodigitYearBorn}", "dd.MM.yyyy", null, System.Globalization.DateTimeStyles.None, out birthDate))
-                {
-                    int age = GetAge(birthDate, today);
-                    if (age < 125 && age >= 0)
-                    {
-                        return age;
-                    }
-                }
-            }
+            //if (individualNumber >= 500 && individualNumber <= 999)
+            //{
+            //    if (DateTime.TryParseExact($"{dayBorn}.{monthBorn}.20{twodigitYearBorn}", "dd.MM.yyyy", null, System.Globalization.DateTimeStyles.None, out birthDate))
+            //    {
+            //        int age = GetAge(birthDate, today);
+            //        if (age < 125 && age >= 0)
+            //        {
+            //            return age;
+            //        }
+            //    }
+            //}
 
             return null;
         }
-
         private static string GetLeftPaddedValue(int totalWidth, char padChar, string input)
         {
             return input.PadLeft(totalWidth, padChar).ToString();

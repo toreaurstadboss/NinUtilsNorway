@@ -128,3 +128,44 @@ https://skatteetaten.github.io/folkeregisteret-api-dokumentasjon/test-for-konsum
 For test data.
 
 Also note that you can implement IDateTimeNowProvider to statically set "today date" for predicatable results while testing.  
+
+
+## Technical - To rebuild the API documentation 
+
+After code is changed, rebuild the solution, a XML file is generated during build (Documentation file). 
+
+In the .csproj file we have set this up: 
+``` xml
+ <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <DocumentationFile>C:\src\NinUtilsNorway\NinUtilsNorway\NinUtilsNorway.xml</DocumentationFile>
+  </PropertyGroup>
+
+```
+
+Then run the following command : 
+```
+
+```
+
+The website Markdown preview can show the Markdown file, 
+or use Vs 2022 extension for Markdown previewing from Mads Christensen, 'Markdown editor V2' for example :
+
+https://markdownlivepreview.com/
+
+
+## Technical - To rebuild another version of the lib
+
+Switch to configuration Release first.
+Rebuild the solution and run nuget pack in release mode : 
+Inside the folder NinUtilsNorway : 
+
+
+```
+nuget pack NinUtilsNorway.csproj -Prop Configuration=Release
+
+```
+
+
+
