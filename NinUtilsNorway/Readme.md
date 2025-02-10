@@ -17,7 +17,7 @@ digits. (usually Modulo 11 algorithm is used):
 - FH help numbers FH-numbers (similar to H-numbers)
 - DUF-number (given to asylum seekers by UDI)
 
-About change of Nin into PID standard as of 2032 : https://www.skatteetaten.no/en/deling/opplysninger/folkeregisteropplysninger/pid/
+About change of Nin into PID standard as of 2032 : https://www.skatteetaten.no/deling/folkeregisteret/pid/
 Sample test persons can be retrieved from here which was helpful in building the util methods.
 https://skatteetaten.github.io/folkeregisteret-api-dokumentasjon/test-for-konsumenter
 
