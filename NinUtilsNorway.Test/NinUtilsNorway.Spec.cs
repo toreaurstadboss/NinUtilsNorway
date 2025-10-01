@@ -96,7 +96,7 @@ public class NinUtilsNorwaySpec
         var expectedDob = !string.IsNullOrWhiteSpace(actual) ? (DateTime?)DateTime.ParseExact(actual, "ddMMyyyy", CultureInfo.InvariantCulture) : null;
         if (actual == null)
         {
-            Assert.IsNull(actual);
+            Assert.That(actual == null);
         }
         else
         {
